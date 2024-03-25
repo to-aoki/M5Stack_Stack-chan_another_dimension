@@ -29,6 +29,7 @@ String html_not_found();
 String rgb_to_string(uint8_t red, uint8_t green, uint8_t blue);
 String html_config();
 String html_apikey();
+String html_service();
 String html_janken();
 String html_hoi();
 String html_ok();

@@ -27,6 +27,13 @@ String ssid = "1234";                      // WIFIのSSID：ダミー値
 String password = "1234";                  // WIFIのパスワード：ダミー値
 String openai_apikey = "1234";             // OPENAIのAPIキー：ダミー値
 String voicevox_apikey = "1234";           // VOICEVOXのAPIキー：ダミー値
+
+// サービスURI（ここをローカルネットワークで互換性を保ちながら解決する）
+String chatgpt_uri = "http://192.168.0.100:8000/v1/chat/completions";               // ChatGPT chatAPI URI
+String chatgpt_model = "gpt-3.5-turbo-1106";                                     // ChatGPT model-id
+String voicevox_uri = "http://192.168.0.100:8081/v3/voicevox/synthesis";             // VOICEVOX 合成音声URI
+String whisper_uri = "http://192.168.0.100:8082/v1/audio/transcriptions";           // Whisper 読み上げ URI
+
 String config_machine_name = "stackchan";  // マシン名
 uint8_t config_volume = 100;               // 音量
 uint8_t config_brightness = 120;           // 明るさ
@@ -292,6 +299,59 @@ void get_nvs_apikey() {
     nvs_close(nvs);
 }
 
+// サービスの保存
+void set_nvs_service() {
+    nvs_handle_t nvs;
+    M5.Log.println("NVS：サービスの保存開始");
+    esp_err_t openResult = nvs_open("MyConfig", NVS_READWRITE, &nvs);
+    if (openResult == ESP_OK) {
+        nvs_set_str(nvs, "chatgpt_uri", chatgpt_uri.c_str());
+        nvs_set_str(nvs, "chatgpt_model", chatgpt_model.c_str());
+        nvs_set_str(nvs, "voicevox_uri", voicevox_uri.c_str());
+        nvs_set_str(nvs, "whisper_uri", whisper_uri.c_str());
+        M5.Log.printf("NVS：サービスの保存成功(%s %s %s %s)\n", chatgpt_uri.c_str(), chatgpt_model.c_str(), voicevox_uri.c_str(), whisper_uri.c_str());
+        avatar.setSpeechText("せっていへんこう");
+    } else {
+        M5.Log.println("NVS：サービスの保存失敗");
+    }
+    nvs_close(nvs);
+    delay(500);
+    avatar.setSpeechText("");
+}
+
+// サービスの読み込み
+void get_nvs_service() {
+    nvs_handle_t nvs;
+    char value[256];
+    size_t length;
+    M5.Log.println("NVS：サービスの読み込み開始");
+    esp_err_t openResult = nvs_open("MyConfig", NVS_READONLY, &nvs);
+    if (openResult == ESP_OK) {
+        if (nvs_get_str(nvs, "chatgpt_uri", 0, &length) == ESP_OK) {
+            nvs_get_str(nvs, "chatgpt_uri", value, &length);
+            chatgpt_uri = String(value);
+        }
+        if (nvs_get_str(nvs, "chatgpt_model", 0, &length) == ESP_OK) {
+            nvs_get_str(nvs, "chatgpt_model", value, &length);
+            chatgpt_model = String(value);
+        } 
+        if (nvs_get_str(nvs, "voicevox_uri", 0, &length) == ESP_OK) {
+            nvs_get_str(nvs, "voicevox_uri", value, &length);
+            voicevox_uri = String(value);
+        }
+        if (nvs_get_str(nvs, "whisper_uri", 0, &length) == ESP_OK) {
+            nvs_get_str(nvs, "whisper_uri", value, &length);
+            whisper_uri = String(value);
+        } 
+        M5.Log.printf("NVS：APYKEYの読み込み成功(%s %s %s %s)\n", chatgpt_uri.c_str(), chatgpt_model.c_str(), voicevox_uri.c_str(), whisper_uri.c_str());
+    } else {
+        M5.Log.println("NVS：APYKEYの読み込み失敗");
+    }
+    nvs_close(nvs);
+}
+
+
+
 // WIFI情報の読み込み
 void get_nvs_wifi() {
     nvs_handle_t nvs;
@@ -483,6 +543,7 @@ void setup() {
     get_nvs_config();
     get_nvs_wifi();
     get_nvs_apikey();
+    get_nvs_service();
 
     auto cfg = M5.config();
     M5.begin(cfg);
@@ -554,6 +615,16 @@ void setup() {
         set_nvs_apikey();
         request->send(200, "text/html", html_ok());
     });
+    // add
+    server.on("/service", HTTP_GET, [](AsyncWebServerRequest *request) {request->send(200, "text/html", html_service()); });
+    server.on("/update_service", HTTP_ANY, [](AsyncWebServerRequest *request) {
+        chatgpt_uri = request->arg("chatgpt_uri");
+        chatgpt_model = request->arg("chatgpt_model");
+        voicevox_uri = request->arg("voicevox_uri");
+        whisper_uri = request->arg("whisper_uri");
+        set_nvs_service();
+        request->send(200, "text/html", html_ok());
+    });    
     server.on("/janken", HTTP_GET, [](AsyncWebServerRequest *request) {request->send(200, "text/html", html_janken()); });
     server.on("/execute_janken", HTTP_ANY, [](AsyncWebServerRequest *request) {
         String text = request->arg("text");
@@ -566,6 +637,7 @@ void setup() {
         hoi(text);
         request->send(200, "text/html", html_ok());
     });
+
     server.onNotFound([](AsyncWebServerRequest *request){ request->send(200, "text/html", html_not_found()); });
     server.begin();
     MDNS.begin(config_machine_name);

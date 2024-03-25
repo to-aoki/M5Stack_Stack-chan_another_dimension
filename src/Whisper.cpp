@@ -107,7 +107,7 @@ String Whisper::transcriptions() {
 
     HTTPClient https;
     https.setTimeout(https_timeout);
-    if (!https.begin(url, root_ca_openai)) {
+    if (!https.begin(whisper_uri)) {
         M5.Log.println("Whisper：接続失敗");
         return "";
     }

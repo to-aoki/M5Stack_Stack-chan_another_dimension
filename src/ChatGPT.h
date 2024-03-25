@@ -10,6 +10,9 @@
 
 extern m5avatar::Avatar avatar;
 extern String openai_apikey;
+extern String chatgpt_uri;
+extern String chatgpt_model;
+
 extern uint8_t config_word_count;
 extern String config_tone;
 extern String config_age;
@@ -25,8 +28,8 @@ public:
     ~ChatGPT();
     String completions(String text);
 private:
-    const String url = "https://api.openai.com/v1/chat/completions";
-    const String model = "gpt-3.5-turbo-1106";
+//    const String url = "https://api.openai.com/v1/chat/completions";
+//    const String model = "gpt-3.5-turbo-1106";
     String role;
 };
 

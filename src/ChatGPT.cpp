@@ -13,12 +13,15 @@ String remove_newline(const String& input) {
 }
 
 ChatGPT::ChatGPT() {
+    role =  "明るく元気に日本語で返信を記述してください。";  // gemma-2b-it デフォルトだと挨拶で「ご視聴は」などの返信なぜかしてしまう
+/*
     role =  "以下の役割を演じてください。";
     role += "あなたは、" + config_age + "、口調は、" + config_tone + "、";
     role += "一人称は、" + config_first_person + "、二人称は、" + config_second_person + "です。";
     role += "私の発言がポジティブの場合、（ポジティブ）を出力し、その後、共感します。";
     role += "私の発言がネガティブの場合、（ネガティブ）を出力し、その後、慰めます。";
     role += "応答の最大文字数は" + String(config_word_count) + "文字です。";
+*/
 }
 
 ChatGPT::~ChatGPT() {
@@ -30,7 +33,7 @@ String ChatGPT::completions(String text) {
 
     HTTPClient https;
     https.setTimeout(https_timeout);
-    if (!https.begin(url, root_ca_openai)) {
+    if (!https.begin(chatgpt_uri)) {
         M5.Log.println("ChatGPT：接続失敗");
         return "";
     }
@@ -44,7 +47,7 @@ String ChatGPT::completions(String text) {
     https.addHeader("Authorization", "Bearer " + openai_apikey);
     https.addHeader("Content-Type", "application/json");
 
-    String send_data = "{\"model\": \"" + model + "\", \"messages\": [";
+    String send_data = "{\"model\": \"" + chatgpt_model + "\", \"messages\": [";
     send_data += "{\"role\": \"system\", \"content\":\"" + role + "\"}";
     M5.Log.printf("  system：%s\n", role.c_str());
     for (int i=0; i<=chat_history.size()-1; i++) {

@@ -50,14 +50,18 @@ String VoiceVox::synthesis(String text) {
 
     HTTPClient https;
     https.setTimeout(https_timeout);
-    if (!https.begin(url, root_ca_voicevox)) {
+    if (!https.begin(voicevox_uri)) {
         M5.Log.println("VOICEVOX：接続失敗");
         return "";
     }
 
-    https.addHeader("content-type", "application/x-www-form-urlencoded");
+    // fastapi で x-www-form-urlencoded (not --data-urlencode) な formの文字化けハンドリングができない...
+    // https://github.com/tiangolo/fastapi/issues/2433
+    // https.addHeader("content-type", "application/x-www-form-urlencoded");
+    // const String send_data = "text=" + text;
 
-    const String send_data = "key=" + voicevox_apikey + "&speaker=" + config_speaker + "&text=" + text;
+    https.addHeader("Content-Type", "application/json");
+    const String send_data = "{\"text\": \"" + text + "\"}";
 
     int http_code = https.POST(send_data.c_str());
     if (!(http_code == HTTP_CODE_OK)) {

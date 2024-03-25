@@ -15,6 +15,7 @@
 
 extern m5avatar::Avatar avatar;
 extern String voicevox_apikey;
+extern String voicevox_uri;
 extern uint8_t config_speaker;
 extern uint16_t https_timeout;
 extern String speaker_name;
@@ -33,8 +34,8 @@ public:
     AudioOutputM5Speaker *out;
     bool is_talking = false;
     String talk_type;
-private:
-    const String url = "https://api.tts.quest/v3/voicevox/synthesis";
+//private:
+//    const String url = "https://api.tts.quest/v3/voicevox/synthesis";
 };
 
 #endif

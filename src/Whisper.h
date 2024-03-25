@@ -9,6 +9,7 @@
 
 extern m5avatar::Avatar avatar;
 extern String openai_apikey;
+extern String whisper_uri;
 extern uint16_t https_timeout;
 
 class Whisper {
@@ -18,7 +19,7 @@ public:
     void record();
     String transcriptions();
 private:
-    const String url = "https://api.openai.com/v1/audio/transcriptions";
+//    const String url = "https://api.openai.com/v1/audio/transcriptions";
     byte* form_data;
 };
 

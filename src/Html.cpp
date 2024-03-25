@@ -15,6 +15,7 @@ String html_root() {
         <ul>
           <li><a href="/config">コンフィグの設定</a></li>
           <li><a href="/apikey">APIキーの登録</a></li>
+          <li><a href="/service">serviceの登録</a></li>
           <li><a href="/chatgpt">ChatGPTにテキスト送信</a></li>
           <li><a href="/voicevox">VOICEVOXにテキスト送信</a></li>
           <li><a href="/text">テキスト表示</a></li>
@@ -315,6 +316,63 @@ String html_apikey() {
           const formData = new FormData(this);
 
           fetch('/update_apikey', {
+            method: 'POST',
+            body: formData
+          })
+          .then(response => {
+            if (response.ok) {
+            console.log('POST成功');
+            } else {
+            console.error('POSTエラー');
+            }
+          })
+          .catch(error => {
+            console.error('POSTエラー:', error);
+          });
+        })
+      </script>
+    </html>)";
+}
+
+String html_service() {
+  return R"(
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>サービスのURI登録</title>
+      </head>
+      <body>
+        <h1>サービスとモデル</h1>
+        <form id="settingsForm">
+          <label for="chatgpt_uri">Chat Completions API URI:</label>
+          <input type="text" id="chatgpt_uri" name="chatgpt_uri">
+          <br>
+          <label for="chatgpt_model">モデル：</label>
+          <input type="text" id="chatgpt_model" name="chatgpt_model">
+          <br>
+          <label for="voicevox_uri">VOICEVOC URI:</label>
+          <input type="text" id="voicevox_uri" name="voicevox_uri">
+          <br>
+          <label for="whisper_uri">Whipser API URI:</label>
+          <input type="text" id="whisper_uri" name="whisper_uri">
+          <br>
+          <button type="submit">登録</button>
+        </form>
+      </body>
+      <script>
+        const chatgpt_uri = document.getElementById("chatgpt_uri");
+        const chatgpt_model = document.getElementById("chatgpt_model");
+        const voicevox_uri = document.getElementById("voicevox_uri");
+        const whisper_uri = document.getElementById("whisper_uri");
+        const settingsForm = document.getElementById("settingsForm");
+        settingsForm.addEventListener("submit", function (e) {
+          e.preventDefault();
+      
+          const formData = new FormData(this);
+
+          fetch('/update_service', {
             method: 'POST',
             body: formData
           })

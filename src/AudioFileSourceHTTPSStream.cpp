@@ -41,8 +41,8 @@ AudioFileSourceHTTPSStream::AudioFileSourceHTTPSStream(const char *url, const ch
 bool AudioFileSourceHTTPSStream::open(const char *url)
 {
   pos = 0;
-  client.setCACert(rootCACertificate);
-  http.begin(client, url);
+  // client.setCACert(rootCACertificate);
+  http.begin(url);
   //http.setReuse(true);
 #ifndef ESP32
   http.setFollowRedirects(HTTPC_FORCE_FOLLOW_REDIRECTS);
